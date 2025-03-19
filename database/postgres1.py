@@ -14,10 +14,13 @@ class PostgreSql:
         insert_query = f"INSERT INTO {table} (taskrefId, subject, homework_name, due_date, status, url) VALUES (%s, %s, %s, %s, %s, %s);"
         for i in data:
             try:
-                due_date = datetime.strptime(i['deadline'], '%m-%d %H:%M').date()
+                due_date = datetime.strptime(f"{datetime.now().year}-{i['deadline']}", '%Y-%m-%d %H:%M')
             except:
                 due_date = None
-            self.cur.execute(insert_query, (i['taskrefId'], i['subject'], i['homework_name'], due_date, i['homework_status'], i['url']))
+            try:
+                self.cur.execute(insert_query, (i['taskrefId'], i['subject'], i['homework_name'], due_date, i['homework_status'], i['url']))
+            except:
+                pass
             self.conn.commit()
     def update(self, sql):
         self.cur.execute(sql)
