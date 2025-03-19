@@ -7,8 +7,8 @@ class PostgreSql:
     def __init__(self, host, port, user, password, database):
         self.conn = psycopg2.connect(f"host={host} port={port} user={user} password={password} dbname={database}")
         self.cur = self.conn.cursor()
-    def query(self, table):
-        self.cur.execute(f"select * from {table}")
+    def select(self, query, data):
+        self.cur.execute(query, data)
         return self.cur.fetchall()
     def insert(self, data, table):
         insert_query = f"INSERT INTO {table} (taskrefId, subject, homework_name, due_date, status, url) VALUES (%s, %s, %s, %s, %s, %s);"
@@ -19,6 +19,7 @@ class PostgreSql:
         try:
             self.cur.execute(insert_query, (data['taskrefId'], data['subject'], data['homework_name'], due_date, data['homework_status'], data['url']))
         except:
+            print(f"Insert {data['homework_name']} failed")
             return False
         self.conn.commit()
         return True
