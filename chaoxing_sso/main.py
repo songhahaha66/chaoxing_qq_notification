@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from chaoxing_sso.chaoxing_me import *
 from chaoxing_sso.xxt_notify import send_qmsg
 from database.postgres1 import PostgreSql
@@ -15,8 +17,17 @@ sql_database = config.get("database","database")
 a = xxt(account,password)
 all_homework = a.get_all_homework()
 print(all_homework)
-sql = PostgreSql(sql_host,sql_port,sql_user,sql_password,sql_database)
-sql.insert(all_homework,"homework")
+db = PostgreSql(sql_host,sql_port,sql_user,sql_password,sql_database)
+
+for homework in all_homework:
+    result = db.insert(homework, "homework")
+    if result:
+        print(f"Insert {homework['homework_name']} successfully")
+    else:
+        db.conn.rollback()
+        update_query = "UPDATE homework SET status = %s,updated_at = %s WHERE taskrefId = %s;"
+        db.update(update_query, (homework['homework_status'], datetime.now(), homework['taskrefId']))
+        print(f"Update {homework['homework_name']} successfully")
 
 """for i in all_homework:
     if i['homework_status'] == "未提交":
