@@ -30,13 +30,17 @@ class xxt:
             homework_status = i.find_all("span")[0].text
             subject = i.find_all("span")[1].text
             url = i['data']
+            try:
+                taskrefId = url.split('taskrefId=')[1].split('&')[0]
+            except:
+                taskrefId = None
             if homework_status != "未提交":
-                result.append({"subject":subject,"homework_name":homework_name, "homework_status":homework_status, "url":url})
+                result.append({"subject":subject,"homework_name":homework_name, "homework_status":homework_status, "url":url, "taskrefId":taskrefId})
             else:
                 r = self.req.get(url)
                 p = BeautifulSoup(r.text, 'html.parser')
                 deadline = p.find_all("h4")[1].text[5:]
-                result.append({"subject":subject,"homework_name":homework_name, "homework_status":homework_status, "url":url, "deadline":deadline})
+                result.append({"subject":subject,"homework_name":homework_name, "homework_status":homework_status, "url":url, "deadline":deadline, "taskrefId":taskrefId})
         return result
 
     def get_all_exam(self):
