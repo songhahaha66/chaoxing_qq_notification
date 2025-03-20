@@ -13,13 +13,10 @@ class PostgreSql:
     def insert(self, data, table):
         insert_query = f"INSERT INTO {table} (taskrefId, subject, homework_name, due_date, status, url) VALUES (%s, %s, %s, %s, %s, %s);"
         try:
-            due_date = datetime.strptime(f"{datetime.now().year}-{data['deadline']}", '%Y-%m-%d %H:%M')
-        except:
-            due_date = None
-        try:
-            self.cur.execute(insert_query, (data['taskrefId'], data['subject'], data['homework_name'], due_date, data['homework_status'], data['url']))
+            self.cur.execute(insert_query, (data['taskrefId'], data['subject'], data['homework_name'], data['due_date'], data['homework_status'], data['url']))
         except:
             print(f"Insert {data['homework_name']} failed")
+            self.conn.rollback()
             return False
         self.conn.commit()
         return True

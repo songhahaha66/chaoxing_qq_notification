@@ -6,6 +6,7 @@ config.read("./config.ini",encoding="utf-8")
 qqtoken = config.get("napcat","token")
 host = config.get("napcat","host")
 qq_number = config.get("qq","number")
+
 def send_qmsg(msg):
     conn = http.client.HTTPConnection(host=host)
     payload = json.dumps({
