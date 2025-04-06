@@ -65,11 +65,11 @@ def get_and_update_data():
             except:
                 homework_copy['due_date'] = None
             result = db.insert(homework_copy, "homework")
-
             if result:
                 print(f"Insert {homework['homework_name']} successfully")
                 if homework_copy['due_date']:
-                    schedule_task(homework_copy['taskrefId'], homework_copy['due_date'] - datetime.timedelta(days=1))
+                    print("提交时间：", homework_copy['due_date'])
+                    schedule_task(homework_copy['taskrefId'], homework_copy['due_date'])
         else:
             print(f"{homework['homework_name']} already exists")
 
@@ -80,7 +80,6 @@ def start_program():
     get_and_update_data()
 
 
-
 if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     scheduler.start()
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     scheduler.add_job(start_program, 'interval', hours=4,next_run_time=datetime.datetime.now())
     try:
         while True:
-            time.sleep(5)  # 保持主线程运行
+            time.sleep(100)
     except (KeyboardInterrupt, SystemExit):
         print("Shutting down...")
         scheduler.shutdown()
