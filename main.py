@@ -3,10 +3,10 @@ import configparser
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from chaoxing_sso import chaoxing_me
-from chaoxing_sso.chaoxing_me import *
-from chaoxing_sso.xxt_notify import send_qmsg
-from database.postgres1 import PostgreSql
+import chaoxing_me
+from chaoxing_me import *
+from xxt_notify import send_qmsg
+from postgres1 import PostgreSql
 
 config = configparser.ConfigParser()
 config.read("./config.ini", encoding="utf-8")
@@ -18,13 +18,6 @@ sql_port = config.get("database", "port")
 sql_user = config.get("database", "username")
 sql_password = config.get("database", "password")
 sql_database = config.get("database", "database")
-
-scheduler = BackgroundScheduler()
-scheduler.start()
-job_cache = {}  # 存储已调度的作业任务 {作业ID: 任务对象}
-
-
-db = PostgreSql(sql_host, sql_port, sql_user, sql_password, sql_database)
 
 def schedule_task(task_id, due_date):
     """添加定时任务"""
@@ -85,10 +78,14 @@ def start_program():
     xxt = chaoxing_me.xxt(account, password)
     get_and_update_data()
 
-# 使用调度器定期运行 `get_and_update_data`，比如每隔 1 小时运行一次
-scheduler.add_job(start_program, 'interval', hours=4)
+
 
 if __name__ == "__main__":
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    job_cache = {}  # 存储已调度的作业任务 {作业ID: 任务对象}
+    db = PostgreSql(sql_host, sql_port, sql_user, sql_password, sql_database)
+    scheduler.add_job(start_program, 'interval', hours=4,next_run_time=datetime.datetime.now())
     try:
         while True:
             time.sleep(5)  # 保持主线程运行
