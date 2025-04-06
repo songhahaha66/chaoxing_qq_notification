@@ -19,19 +19,20 @@ sql_user = config.get("database", "username")
 sql_password = config.get("database", "password")
 sql_database = config.get("database", "database")
 
+remain_days = [float(x) for x in config.get("notify","remain_days").split(",")]
+
 def schedule_task(task_id, due_date):
-    """添加定时任务"""
-    now = datetime.datetime.now()
-    if due_date > now:
-        print(f"添加作业 {task_id}，将在 {due_date} 执行任务")
-        job = scheduler.add_job(my_task, 'date', run_date=due_date, args=[task_id, 1])
-        job_cache[task_id] = job
+    for d in remain_days:
+        notify_time = due_date - datetime.timedelta(days=d)
+        if notify_time > datetime.datetime.now():
+            job = scheduler.add_job(my_task, 'date', run_date=notify_time, args=[task_id, d])
+            job_cache.setdefault(task_id, []).append(job)
 
 def cancel_task(task_id):
     """取消定时任务"""
     if task_id in job_cache:
-        print(f"取消作业 {task_id} 的定时任务")
-        job_cache[task_id].remove()
+        for job in job_cache[task_id]:
+            scheduler.remove_job(job.id)
         del job_cache[task_id]
 
 def my_task(task_id, remain_time):
