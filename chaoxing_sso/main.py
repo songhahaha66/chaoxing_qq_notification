@@ -1,7 +1,9 @@
 import datetime
 import configparser
+import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from chaoxing_sso import chaoxing_me
 from chaoxing_sso.chaoxing_me import *
 from chaoxing_sso.xxt_notify import send_qmsg
 from database.postgres1 import PostgreSql
@@ -21,12 +23,15 @@ scheduler = BackgroundScheduler()
 scheduler.start()
 job_cache = {}  # 存储已调度的作业任务 {作业ID: 任务对象}
 
+
+db = PostgreSql(sql_host, sql_port, sql_user, sql_password, sql_database)
+
 def schedule_task(task_id, due_date):
     """添加定时任务"""
     now = datetime.datetime.now()
     if due_date > now:
         print(f"添加作业 {task_id}，将在 {due_date} 执行任务")
-        job = scheduler.add_job(my_task, 'date', run_date=due_date, args=[task_id,1])
+        job = scheduler.add_job(my_task, 'date', run_date=due_date, args=[task_id, 1])
         job_cache[task_id] = job
 
 def cancel_task(task_id):
@@ -36,7 +41,7 @@ def cancel_task(task_id):
         job_cache[task_id].remove()
         del job_cache[task_id]
 
-def my_task(task_id,remain_time):
+def my_task(task_id, remain_time):
     """作业截止时间触发的任务"""
     query = "SELECT * FROM homework WHERE taskrefId = %s;"
     result = db.select(query, (task_id,))
@@ -49,7 +54,7 @@ def get_all_homework(db):
     results = db.select(query, ())
     return [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5]) for row in results]
 
-def get_and_update_data(xxt, db):
+def get_and_update_data():
     all_homework = xxt.get_all_homework()
     all_homework_sql = get_all_homework(db)
     for homework in all_homework:
@@ -74,8 +79,19 @@ def get_and_update_data(xxt, db):
         else:
             print(f"{homework['homework_name']} already exists")
 
-if __name__ == "__main__":
-    xxt = xxt(account, password)
-    db = PostgreSql(sql_host, sql_port, sql_user, sql_password, sql_database)
-    get_and_update_data(xxt, db)
+def start_program():
+    """用于启动任务和周期性更新"""
+    global xxt
+    xxt = chaoxing_me.xxt(account, password)
+    get_and_update_data()
 
+# 使用调度器定期运行 `get_and_update_data`，比如每隔 1 小时运行一次
+scheduler.add_job(start_program, 'interval', hours=4)
+
+if __name__ == "__main__":
+    try:
+        while True:
+            time.sleep(5)  # 保持主线程运行
+    except (KeyboardInterrupt, SystemExit):
+        print("Shutting down...")
+        scheduler.shutdown()
