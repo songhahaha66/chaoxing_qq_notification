@@ -25,7 +25,7 @@ def schedule_task(task_id, due_date):
     for d in remain_days:
         notify_time = due_date - datetime.timedelta(days=d)
         if notify_time > datetime.datetime.now():
-            job = scheduler.add_job(my_task, 'date', run_date=notify_time, args=[task_id, d])
+            job = scheduler.add_job(my_task, 'date', run_date=notify_time, args=[task_id, d,due_date])
             job_cache.setdefault(task_id, []).append(job)
 
 def cancel_task(task_id):
@@ -35,13 +35,13 @@ def cancel_task(task_id):
             scheduler.remove_job(job.id)
         del job_cache[task_id]
 
-def my_task(task_id, remain_time):
+def my_task(task_id, remain_time,due_time):
     """作业截止时间触发的任务"""
     query = "SELECT * FROM homework WHERE taskrefId = %s;"
     result = db.select(query, (task_id,))
     homework_name = result[0][2]
     homework_subject = result[0][1]
-    send_qmsg(f"你的作业 {homework_name}({homework_subject}) 还有 {remain_time}天截止，请尽快完成！")
+    send_qmsg(f"你的作业 {homework_name}({homework_subject}) 截止时间为{due_time}，还有{float(remain_time)*24}小时！")
 
 def get_all_homework(db):
     query = "SELECT * FROM homework;"
@@ -54,7 +54,7 @@ def get_and_update_data():
     for homework in all_homework:
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']), None)
-        if index is not None and homework['homework_status'] == "已完成" and all_homework_sql[index]['status'] == "未提交":
+        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['status'] == "未提交":
             update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
             db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
