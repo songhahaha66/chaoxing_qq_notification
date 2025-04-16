@@ -2,3 +2,4 @@
 .venv
 config.ini
 /test
+/frontend/node_modules
