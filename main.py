@@ -11,8 +11,8 @@ from postgres1 import PostgreSql
 config = configparser.ConfigParser()
 config.read("./config.ini", encoding="utf-8")
 
-account = config.get("chaoxing", "account")
-password = config.get("chaoxing", "password")
+chaoxing_account = config.get("chaoxing", "account")
+chaoxing_password = config.get("chaoxing", "password")
 sql_host = config.get("database", "endpoint")
 sql_port = config.get("database", "port")
 sql_user = config.get("database", "username")
@@ -76,7 +76,7 @@ def get_and_update_data():
 def start_program():
     """用于启动任务和周期性更新"""
     global xxt
-    xxt = chaoxing_me.xxt(account, password)
+    xxt = chaoxing_me.xxt(chaoxing_account, chaoxing_password)
     get_and_update_data()
 
 
