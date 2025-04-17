@@ -46,7 +46,7 @@ const req = (i: number) => api.get('/get/homework',
     },
     params: {
       page: i,
-      page_size: 20
+      page_size: 10
     }
   },
 ).then(response => {
@@ -97,7 +97,7 @@ import { onMounted, ref } from 'vue';
         <div class="refresh"><ElButton @click="refresh" type="primary">刷新</ElButton></div>
       </ElRow>
         <ElRow :gutter="20">
-      <div v-for="(homework, index) in homeworkData" :key="index" style="width: 300px; height: 210px; margin: 0 20px;">
+      <div v-for="(homework, index) in homeworkData" :key="index" style="width: 300px; height: 200px; margin: 0 20px;">
         <ElCard>
           <template #header>
         <ElSpace>
@@ -122,9 +122,8 @@ import { onMounted, ref } from 'vue';
     </ElRow>
     </div>
     <div v-else>
-      <ElText>No homework data available.</ElText>
+      <ElText type="danger">没有作业</ElText>
     </div>
-  
   </main>
 </template>
 <style scoped>
@@ -135,9 +134,13 @@ import { onMounted, ref } from 'vue';
   font-size: large;
   height: 30px;
 }
-.homework_data{
-  height: 100vh;
+.homework_data {
+  height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden; 
+}
+.homework_data .el-row {
+  flex-wrap: wrap;
 }
 .title_header {
   display: flex;
