@@ -8,18 +8,7 @@ from chaoxing_me import *
 from xxt_notify import send_qmsg
 from postgres1 import PostgreSql
 
-config = configparser.ConfigParser()
-config.read("./config.ini", encoding="utf-8")
 
-chaoxing_account = config.get("chaoxing", "account")
-chaoxing_password = config.get("chaoxing", "password")
-sql_host = config.get("database", "endpoint")
-sql_port = config.get("database", "port")
-sql_user = config.get("database", "username")
-sql_password = config.get("database", "password")
-sql_database = config.get("database", "database")
-
-remain_days = [float(x) for x in config.get("notify","remain_days").split(",")]
 
 def schedule_task(task_id, due_date):
     for d in remain_days:
@@ -48,7 +37,7 @@ def get_all_homework(db):
     results = db.select(query, ())
     return [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5]) for row in results]
 
-def get_and_update_data():
+def get_and_update_data(xxt, db):
     all_homework = xxt.get_all_homework()
     all_homework_sql = get_all_homework(db)
     for homework in all_homework:
@@ -77,10 +66,23 @@ def start_program():
     """用于启动任务和周期性更新"""
     global xxt
     xxt = chaoxing_me.xxt(chaoxing_account, chaoxing_password)
-    get_and_update_data()
+    get_and_update_data(xxt, db)
 
 
 if __name__ == "__main__":
+    config = configparser.ConfigParser()
+    config.read("./config.ini", encoding="utf-8")
+
+    chaoxing_account = config.get("chaoxing", "account")
+    chaoxing_password = config.get("chaoxing", "password")
+    sql_host = config.get("database", "endpoint")
+    sql_port = config.get("database", "port")
+    sql_user = config.get("database", "username")
+    sql_password = config.get("database", "password")
+    sql_database = config.get("database", "database")
+
+    remain_days = [float(x) for x in config.get("notify", "remain_days").split(",")]
+
     scheduler = BackgroundScheduler()
     scheduler.start()
     job_cache = {}  # 存储已调度的作业任务 {作业ID: 任务对象}
