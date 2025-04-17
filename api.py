@@ -7,6 +7,8 @@ from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
+
+import main
 from postgres1 import PostgreSql
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -181,3 +183,12 @@ def update_account(Account: ChaoxingAccount, token: str = Depends(oauth2_scheme)
     chaoxing_account = config.get("chaoxing", "account")
     chaoxing_password = config.get("chaoxing", "password")
     return {"message": "Account updated successfully"}
+
+@app.get("/update/homework")
+def update_homework(token: str = Depends(oauth2_scheme)):
+    """更新作业（需要验证令牌）"""
+    verify_token(token)
+    xxt = main.xxt(chaoxing_account, chaoxing_password)
+    main.get_and_update_data(xxt, db)
+
+    return {"code":1,"message": "Homework updated successfully"}
