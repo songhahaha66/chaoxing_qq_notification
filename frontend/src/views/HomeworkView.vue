@@ -46,7 +46,7 @@ const req = (i: number) => api.get('/get/homework',
     },
     params: {
       page: i,
-      page_size: 10
+      page_size: 20
     }
   },
 ).then(response => {
@@ -61,37 +61,65 @@ onMounted(() => {
   req(i.value);
 });
 
-import { ElButton, ElCard, ElInput, ElRow, ElSpace, ElText } from 'element-plus';
+const jumpXxt = (url: string) => {
+  window.location.href = url;
+}
+
+const remainingTime = (dueDate: string) => {
+  const now = new Date();
+  const due = new Date(dueDate);
+  const diff = due.getTime() - now.getTime();
+  return Math.floor(diff / (1000 * 60 * 60)); // 返回剩余小时数
+}
+
+const refresh = () => api.get('/update/homework',
+  {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+    }
+  }
+).then(response => {
+  const update_homework_msg = response.data;
+  console.log(update_homework_msg);
+}).catch(error => {
+  console.error('Error fetching homework data:', error);
+});
+
+import { ElButton, ElCard, ElInput, ElRow, ElScrollbar, ElSpace, ElText } from 'element-plus';
 import { onMounted, ref } from 'vue';
 </script>
 
 <template>
   <main>
-    <div v-if="homeworkData">
-        <ElText size="large">作业列表</ElText>
+    <div v-if="homeworkData" class="homework_data">
+      <ElRow class="title_header">
+        <ElText size="large" class="homework_header">作业列表</ElText>
+        <div class="refresh"><ElButton @click="refresh" type="primary">刷新</ElButton></div>
+      </ElRow>
         <ElRow :gutter="20">
-      <div v-for="(homework, index) in homeworkData" :key="index" style="width: 300px; height: 200px; margin: 0 20px;">
+      <div v-for="(homework, index) in homeworkData" :key="index" style="width: 300px; height: 210px; margin: 0 20px;">
         <ElCard>
           <template #header>
         <ElSpace>
           <ElText>{{ homework.homework_name }}</ElText>
-          <ElButton @click="req(i)" type="primary">查看</ElButton>
+          <ElText v-if="homework.status === '未提交'" type="danger">还有{{ remainingTime(homework.due_date) }}小时截止</ElText>
+          <ElButton @click="jumpXxt(homework.url)" type="primary">查看</ElButton>
         </ElSpace>
           </template>
           <div>
         <div>{{ homework.subject }}</div>
-        <div>{{ homework.due_date }}</div>
+        <div v-if="homework.status==='未提交'">{{ homework.due_date }}</div>
         <div>{{ homework.status }}</div>
           </div>
         </ElCard>
       </div>
     </ElRow>
-      <div v-if="all_pages > 1 && i < all_pages">
-        <ElButton @click="req(i++)" type="primary">下一页</ElButton>
-      </div>
-      <div v-if="all_pages > 1 && i > 1">
-        <ElButton @click="req(--i)" type="primary">上一页</ElButton>
-      </div>
+    <ElRow>
+      <ElSpace>
+        <ElButton @click="req(--i)" :disabled="i <= 1" type="primary">上一页</ElButton>
+        <ElButton @click="req(++i)" :disabled="i >= all_pages" type="primary">下一页</ElButton>
+      </ElSpace>
+    </ElRow>
     </div>
     <div v-else>
       <ElText>No homework data available.</ElText>
@@ -99,3 +127,22 @@ import { onMounted, ref } from 'vue';
   
   </main>
 </template>
+<style scoped>
+.homework_header {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  font-size: large;
+  height: 30px;
+}
+.homework_data{
+  height: 100vh;
+  overflow-y: auto;
+}
+.title_header {
+  display: flex;
+}
+.refresh {
+  margin:0 20px;
+}
+</style>

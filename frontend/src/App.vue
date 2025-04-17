@@ -17,7 +17,7 @@ try{
 <template>
  <div class="common-layout" v-if="route.path !== '/login'">
   <ElContainer>
-   <ElHeader>超星学习通作业查询系统</ElHeader>
+   <ElHeader class="main_header">超星学习通作业查询系统</ElHeader>
     <ElContainer>
     <ElAside>
       <ElScrollbar> 
@@ -68,6 +68,10 @@ try{
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.main_header {
+  border: 1px solid var(--el-border-color);
+  height: 60px;
 }
 
 </style>
