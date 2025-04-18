@@ -59,8 +59,7 @@ def get_and_update_data(xxt, db):
             db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
             cancel_task(homework['taskrefId'])
-
-        elif not all_homework_sql[index]['schedule_task']:
+        elif index is None:
             try:
                 homework_copy['due_date'] = datetime.datetime.strptime(f"{datetime.datetime.now().year}-{homework['deadline']}", '%Y-%m-%d %H:%M')
             except:
