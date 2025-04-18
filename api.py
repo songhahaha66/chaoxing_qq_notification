@@ -45,7 +45,9 @@ ALGORITHM = config.get("auth", "algorithm")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
+    'http://songhahaha1.eastasia.cloudapp.azure.com',
     'http://localhost:5173',
+    'http://homework.songhahaha.top'
 ]
 app.add_middleware(
     CORSMiddleware,
