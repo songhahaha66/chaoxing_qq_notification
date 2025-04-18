@@ -24,7 +24,7 @@ def schedule_task(task_id, due_date):
             job = scheduler.add_job(my_task, 'date', run_date=notify_time, args=[task_id, days, due_date])
             job_cache.setdefault(task_id, []).append(job)
     update_query = "UPDATE homework SET schedule_task = true WHERE taskrefId = %s;"
-    db.update(update_query, (task_id))
+    db.update(update_query, (task_id,))
     print(f"任务添加成功，作业ID:{task_id}，截止时间:{due_date}")
 
 
