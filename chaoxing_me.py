@@ -1,4 +1,5 @@
 import configparser
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -52,4 +53,27 @@ class xxt:
             exam_status = i.find("span").text
             url = i['data']
             result.append({"exam_name":exam_name, "exam_status":exam_status, "url":url})
+        return result
+
+    def get_homework_detail_url(self, url):
+        req = self.req.get(url)
+        page = BeautifulSoup(req.text, 'html.parser')
+        scripts = page.find_all("script")
+        for script in scripts:
+            pattern = r"(/work/phone/doHomeWork\?[^']+)"
+            match = re.search(pattern, str(script.string))
+            if match:
+                url = match.group(1)
+                url = "https://mooc1-api.chaoxing.com/mooc-ans" + url
+                print(url)
+                return url
+
+    def get_homework_detail_info(self, detail_url):
+        res = self.req.get(detail_url)
+        page = BeautifulSoup(res.text, 'html.parser')
+        result = []
+        for i in page.find_all("div",class_="pad30"):
+            question = i.find("h2",class_="titType").text
+            description = i.find("p").text
+            result.append({"question":question,"description":description})
         return result
