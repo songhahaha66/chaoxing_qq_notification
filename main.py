@@ -54,7 +54,7 @@ def get_and_update_data(xxt, db):
     for homework in all_homework:
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']), None)
-        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['schedule_task']:
+        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['status'] == '未提交':
             update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
             db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
@@ -69,7 +69,6 @@ def get_and_update_data(xxt, db):
                 print(f"Insert {homework['homework_name']} successfully")
                 if homework_copy['due_date']:
                     print("提交时间：", homework_copy['due_date'])
-                    schedule_task(homework_copy['taskrefId'], homework_copy['due_date'])
         else:
             print(f"{homework['homework_name']} already exists")
 

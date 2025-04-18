@@ -8,7 +8,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-import main
+import chaoxing_me
 from postgres1 import PostgreSql
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -124,6 +124,39 @@ def verify_refresh_token(token: str):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+def get_all_homework_list(db):
+    query = "SELECT * FROM homework;"
+    results = db.select(query, ())
+    return [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5],schedule_task=row[8]) for row in results]
+
+
+
+def get_and_update_homework_list(xxt, db):
+    all_homework = xxt.get_all_homework()
+    all_homework_sql = get_all_homework_list(db)
+    for homework in all_homework:
+        homework_copy = homework.copy()
+        index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']),
+                     None)
+        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['status'] == '未提交':
+            update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
+            db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
+            print(f"Update {homework['homework_name']} successfully")
+        elif index is None:
+            try:
+                homework_copy['due_date'] = datetime.datetime.strptime(
+                    f"{datetime.datetime.now().year}-{homework['deadline']}", '%Y-%m-%d %H:%M')
+            except:
+                homework_copy['due_date'] = None
+            result = db.insert(homework_copy, "homework")
+            if result:
+                print(f"Insert {homework['homework_name']} successfully")
+                if homework_copy['due_date']:
+                    print("提交时间：", homework_copy['due_date'])
+        else:
+            print(f"{homework['homework_name']} already exists")
+
+
 # 文件：api.py
 @app.post("/token")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -190,7 +223,6 @@ def update_account(Account: ChaoxingAccount, token: str = Depends(oauth2_scheme)
 def update_homework(token: str = Depends(oauth2_scheme)):
     """更新作业（需要验证令牌）"""
     verify_token(token)
-    xxt = main.xxt(chaoxing_account, chaoxing_password)
-    main.get_and_update_data(xxt, db)
-
+    xxt = chaoxing_me.xxt(chaoxing_account, chaoxing_password)
+    get_and_update_homework_list(xxt,db)
     return {"code":1,"message": "Homework updated successfully"}
