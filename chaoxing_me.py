@@ -74,6 +74,8 @@ class xxt:
         result = []
         for i in page.find_all("div",class_="pad30"):
             question = i.find("h2",class_="titType").text
-            description = i.find("p").text
+            description = ''
+            for d in i.find_all('p'):
+                description += d.text
             result.append({"question":question,"description":description})
         return result
