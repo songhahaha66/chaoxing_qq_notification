@@ -140,12 +140,13 @@ def get_and_update_homework_list(xxt, db):
                      None)
         if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['status'] == '未提交':
             update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
-            db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
+            db.update(update_query, (homework['homework_status'], datetime.now(), homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
         elif index is None:
+            print(homework)
             try:
-                homework_copy['due_date'] = datetime.datetime.strptime(
-                    f"{datetime.datetime.now().year}-{homework['deadline']}", '%Y-%m-%d %H:%M')
+                homework_copy['due_date'] = datetime.strptime(
+                    f"{datetime.now().year}-{homework['deadline']}", '%Y-%m-%d %H:%M')
             except:
                 homework_copy['due_date'] = None
             result = db.insert(homework_copy, "homework")
