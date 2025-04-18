@@ -137,7 +137,7 @@ def get_and_update_homework_list(xxt, db):
     all_homework_sql = get_all_homework_list(db)
     for homework in all_homework_sql:
         try:
-            if homework['detail_url'] is None:
+            if homework['detail_url'] is None and homework['status'] =='未提交':
                 homework['detail_url'] = xxt.get_homework_detail_url(homework['url'])
                 homework['detail_info'] = xxt.get_homework_detail_info(homework['detail_url'])
                 json_data = json.dumps(homework['detail_info'])
