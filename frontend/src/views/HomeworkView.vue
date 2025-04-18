@@ -135,7 +135,7 @@ import { onMounted, ref } from 'vue';
   height: 30px;
 }
 .homework_data {
-  height: 90vh;
+  height: 80vh;
   overflow-y: auto;
   overflow-x: hidden; 
 }
