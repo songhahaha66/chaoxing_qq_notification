@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import router from '@/router';
 import axios from 'axios';
 
 const api = axios.create({
@@ -85,6 +86,9 @@ const refresh = () => api.get('/update/homework',
   console.error('Error fetching homework data:', error);
 });
 
+const jumpCard = (taskrefId: string) => {
+    router.push({ name: 'detail', params: { id: taskrefId } });
+}
 import { ElButton, ElCard, ElInput, ElRow, ElScrollbar, ElSpace, ElText } from 'element-plus';
 import { onMounted, ref } from 'vue';
 </script>
@@ -96,20 +100,22 @@ import { onMounted, ref } from 'vue';
         <ElText size="large" class="homework_header">作业列表</ElText>
         <div class="refresh"><ElButton @click="refresh" type="primary">刷新</ElButton></div>
       </ElRow>
-        <ElRow :gutter="20">
+      <ElRow :gutter="20">
       <div v-for="(homework, index) in homeworkData" :key="index" style="width: 300px; height: 200px; margin: 0 20px;">
-        <ElCard>
+        <ElCard @click="jumpCard(homework.taskrefId)" class="clickable-card">
           <template #header>
-        <ElSpace>
-          <ElText>{{ homework.homework_name }}</ElText>
-          <ElText v-if="homework.status === '未提交'" type="danger">还有{{ remainingTime(homework.due_date) }}小时截止</ElText>
-          <ElButton @click="jumpXxt(homework.url)" type="primary">查看</ElButton>
-        </ElSpace>
+            <ElSpace>
+              <ElText>{{ homework.homework_name }}</ElText>
+              <ElText v-if="homework.status === '未提交'" type="danger">
+          还有{{ remainingTime(homework.due_date) }}小时截止
+              </ElText>
+              <ElButton @click.stop="jumpXxt(homework.detail_url)" type="primary">查看</ElButton>
+            </ElSpace>
           </template>
           <div>
-        <div>{{ homework.subject }}</div>
-        <div v-if="homework.status==='未提交'">{{ homework.due_date }}</div>
-        <div>{{ homework.status }}</div>
+            <div>{{ homework.subject }}</div>
+            <div v-if="homework.status==='未提交'">{{ homework.due_date }}</div>
+            <div>{{ homework.status }}</div>
           </div>
         </ElCard>
       </div>
