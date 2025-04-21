@@ -1,5 +1,6 @@
 import datetime
 import configparser
+import json
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -51,6 +52,18 @@ def get_all_homework(db):
 def get_and_update_data(xxt, db):
     all_homework = xxt.get_all_homework()
     all_homework_sql = get_all_homework(db)
+    for homework in all_homework_sql:
+        try:
+            if homework['detail_url'] is None:
+                homework['detail_url'] = xxt.get_homework_detail_url(homework['url'])
+                homework['detail_info'] = xxt.get_homework_detail_info(homework['detail_url'])
+                json_data = json.dumps(homework['detail_info'])
+                if homework['detail_url']:
+                    update_query = "UPDATE homework SET detail_url = %s,detail_info = %s WHERE taskrefId = %s;"
+                    db.update(update_query, (homework['detail_url'], json_data,homework['taskrefId']))
+                    print(f"Update {homework['homework_name']} detail url successfully")
+        except:
+            print(f"Failed to update {homework['homework_name']} detail url")
     for homework in all_homework:
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']), None)

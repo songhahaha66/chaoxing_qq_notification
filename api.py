@@ -1,4 +1,5 @@
 import configparser
+import json
 from typing import Union
 from datetime import datetime, timedelta
 
@@ -127,13 +128,26 @@ def verify_refresh_token(token: str):
 def get_all_homework_list(db):
     query = "SELECT * FROM homework;"
     results = db.select(query, ())
-    return [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5],schedule_task=row[8]) for row in results]
+    return [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5],schedule_task=row[8],detail_url=row[9],detail_info=row[10]) for row in results]
 
 
 
 def get_and_update_homework_list(xxt, db):
     all_homework = xxt.get_all_homework()
     all_homework_sql = get_all_homework_list(db)
+    for homework in all_homework_sql:
+        try:
+            if homework['detail_url'] is None:
+                homework['detail_url'] = xxt.get_homework_detail_url(homework['url'])
+                homework['detail_info'] = xxt.get_homework_detail_info(homework['detail_url'])
+                json_data = json.dumps(homework['detail_info'])
+                if homework['detail_url']:
+                    update_query = "UPDATE homework SET detail_url = %s,detail_info = %s WHERE taskrefId = %s;"
+                    db.update(update_query, (homework['detail_url'], json_data,homework['taskrefId']))
+                    print(f"Update {homework['homework_name']} detail url successfully")
+        except:
+            print(f"Failed to update {homework['homework_name']} detail url")
+
     for homework in all_homework:
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']),
@@ -202,9 +216,19 @@ def query_homework(page: int = 1, page_size: int = 10, token: str = Depends(oaut
         "page": page,
         "total_pages":total_pages ,
         "total_count": total_count,
-        "data": [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5]) for row in results]
+        "data": [dict(taskrefId=row[0], subject=row[1], homework_name=row[2], due_date=row[3], status=row[4], url=row[5],detail_url=row[9]) for row in results]
     }
     return return_data
+@app.get("/get/homework/{taskrefId}")
+def query_homework_by_id(taskrefId: str, token: str = Depends(oauth2_scheme)):
+    """根据作业 ID 查询作业详情（需要验证令牌）"""
+    verify_token(token)
+    query = "SELECT * FROM homework WHERE taskrefId = %s;"
+    result = db.select(query, (taskrefId,))
+    if result:
+        return {"data": dict(taskrefId=result[0][0], subject=result[0][1], homework_name=result[0][2], due_date=result[0][3], status=result[0][4], url=result[0][5],detail_url=result[0][9],detail_info=result[0][10])}
+    else:
+        raise HTTPException(status_code=404, detail="Homework not found")
 
 @app.post("/update/account")
 def update_account(Account: ChaoxingAccount, token: str = Depends(oauth2_scheme)):
