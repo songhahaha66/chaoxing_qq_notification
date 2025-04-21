@@ -12,7 +12,7 @@ def load_tasks_from_db():
     """从数据库加载任务并调度"""
     all_homework = get_all_homework(db)
     for homework in all_homework:
-        if homework['due_date'] and homework['status'] == "未提交" and not homework['schedule_task']:
+        if homework['due_date'] and homework['status'] == "未提交" and homework['schedule_task']==None:
             schedule_task(homework['taskrefId'], homework['due_date'])
 
 def schedule_task(task_id, due_date):
@@ -54,8 +54,8 @@ def get_and_update_data(xxt, db):
     for homework in all_homework:
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']), None)
-        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['status'] == '未提交':
-            update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
+        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['schedule_task'] ==True:
+            update_query = "UPDATE homework SET status = %s, schedule_task=False,updated_at = %s WHERE taskrefId = %s;"
             db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
             cancel_task(homework['taskrefId'])
