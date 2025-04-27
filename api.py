@@ -152,7 +152,7 @@ def get_and_update_homework_list(xxt, db):
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']),
                      None)
-        if index is not None and homework['homework_status'] != "未提交" and all_homework_sql[index]['status'] == '未提交':
+        if index is not None and homework['homework_status'] != all_homework_sql[index]['status']:
             update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
             db.update(update_query, (homework['homework_status'], datetime.now(), homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
@@ -210,7 +210,7 @@ def query_homework(page: int = 1, page_size: int = 10, token: str = Depends(oaut
     count_result = db.select("SELECT COUNT(*) FROM homework;", ())
     total_count = count_result[0][0]
     total_pages = (total_count + page_size - 1) // page_size
-    query = "SELECT * FROM homework ORDER BY created_at DESC LIMIT %s OFFSET %s;"
+    query = "SELECT * FROM homework ORDER BY (status = '未提交') DESC, created_at DESC LIMIT %s OFFSET %s;"
     results = db.select(query, (page_size, (page - 1) * page_size))
     return_data = {
         "page": page,

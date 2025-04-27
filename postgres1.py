@@ -6,6 +6,7 @@ import psycopg2
 class PostgreSql:
     def __init__(self, host, port, user, password, database):
         self.conn = psycopg2.connect(f"host={host} port={port} user={user} password={password} dbname={database}")
+        self.conn.autocommit = True
         self.cur = self.conn.cursor()
     def select(self, query, data):
         self.cur.execute(query, data)
