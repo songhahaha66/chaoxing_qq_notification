@@ -68,8 +68,8 @@ def get_and_update_data(xxt, db):
         homework_copy = homework.copy()
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']), None)
         if index is not None and homework['homework_status'] != all_homework_sql[index]['status']:
-            update_query = "UPDATE homework SET status = %s, schedule_task=False,updated_at = %s WHERE taskrefId = %s;"
-            db.update(update_query, (homework['homework_status'], datetime.datetime.now(), homework['taskrefId']))
+            update_query = "UPDATE homework SET status = %s, schedule_task=False,updated_at = %s,detail_url = %s WHERE taskrefId = %s;"
+            db.update(update_query, (homework['homework_status'], datetime.datetime.now(),homework['url'] ,homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
             cancel_task(homework['taskrefId'])
         elif index is None:

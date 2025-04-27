@@ -153,8 +153,8 @@ def get_and_update_homework_list(xxt, db):
         index = next((i for i, hw in enumerate(all_homework_sql) if str(hw['taskrefId']) == homework['taskrefId']),
                      None)
         if index is not None and homework['homework_status'] != all_homework_sql[index]['status']:
-            update_query = "UPDATE homework SET status = %s, updated_at = %s WHERE taskrefId = %s;"
-            db.update(update_query, (homework['homework_status'], datetime.now(), homework['taskrefId']))
+            update_query = "UPDATE homework SET status = %s, updated_at = %s,detail_url = %s WHERE taskrefId = %s;"
+            db.update(update_query, (homework['homework_status'], datetime.now(),homework['url'] ,homework['taskrefId']))
             print(f"Update {homework['homework_name']} successfully")
         elif index is None:
             print(homework)
