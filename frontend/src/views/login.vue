@@ -1,115 +1,123 @@
 <script setup lang="ts">
-import router from '@/router';
-import axios from 'axios';
-import { ElButton, ElInput, ElSpace, ElText } from 'element-plus';
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL
-});
-api.interceptors.response.use(
-  response => response,
-  async error => {
-    const originalRequest = error.config;
-    // 判断是否返回 401 且没有重试过，防止死循环
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const refresh_token = localStorage.getItem('refresh_token');
-      try {
-        // 调用刷新 token 的接口（假设接口为 /refresh，传递 refresh_token）
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/refresh-token`,
-          { refresh_token },
-          { headers: { 'Content-Type': 'application/json' } }
-        );
-        const newAccessToken = response.data.access_token;
-        localStorage.setItem('access_token', newAccessToken);
-        // 更新请求头中的 Authorization 并重试原请求
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        return axios(originalRequest);
-      } catch (refreshError) {
-        // 刷新失败时清除 token 并跳转登录页
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElButton, ElInput, ElSpace, ElText, ElMessage } from 'element-plus';
+import { useAuthStore } from '@/stores/auth';
+import apiClient from '@/services/api';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
 const username = ref('');
 const password = ref('');
-const errorMessage = ref('');
+const isLoading = ref(false);
+
+// Redirect if already logged in
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    router.push('/');
+  }
+});
 
 const login = async () => {
-  const username = (document.getElementById('username') as HTMLInputElement).value;
-  const password = (document.getElementById('password') as HTMLInputElement).value;
+  if (!username.value || !password.value) {
+    ElMessage.error('请输入账户和密码');
+    return;
+  }
+  isLoading.value = true;
   try {
     const formData = new FormData();
-    formData.append('username', username);
-    formData.append('password', password);
+    formData.append('username', username.value);
+    formData.append('password', password.value);
 
-    const response = await api.post('/token', formData, {
+    const response = await apiClient.post('/token', formData, {
       headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
-    const access_token = response.data.access_token;
-    localStorage.setItem('access_token', access_token);
-    const refresh_token = response.data.refresh_token;
-    localStorage.setItem('refresh_token', refresh_token);
+
+    const accessToken = response.data.access_token;
+    const refreshToken = response.data.refresh_token;
+    authStore.setTokens(accessToken, refreshToken);
+    ElMessage.success('登录成功');
     router.push('/');
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        errorMessage.value = '用户名或密码错误';
-      } else {
-        // The request was made but no response was received
-        errorMessage.value = '网络错误，请稍后再试';
-      }
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.detail) {
+      ElMessage.error(error.response.data.detail);
+    } else if (error.message && error.message.includes('Network Error')) {
+       ElMessage.error('网络错误，请检查您的网络连接。');
+    } else {
+      ElMessage.error('登录失败，请检查您的账户或密码。');
     }
+    console.error('Login error:', error);
+  } finally {
+    isLoading.value = false;
   }
 };
-try{
-  const access_token = localStorage.getItem('access_token');
-  const refresh_token = localStorage.getItem('refresh_token');
-  if (access_token && refresh_token) {
-    router.push('/');
-  }
-} catch (error) {
-  console.error('Error retrieving tokens:', error);
-}
 </script>
 
 <template>
-  <main>
-  <ElSpace 
-  direction="vertical" 
-  style="border-radius: var(--el-border-radius-round); border: 1px solid #ccc; padding: 20px;">
-  <ElText type="primary" size="large">超星学习通作业查询系统</ElText>
-  <ElInput id="username" v-model="username" placeholder="账户"></ElInput>
-  <ElInput id="password" v-model="password" type="password" placeholder="密码"></ElInput>
-  <ElButton id="loginButton" type="primary" @click="login">登陆</ElButton>
-  <ElText type="danger" size="small" v-if="errorMessage">{{ errorMessage }}</ElText>
-  </ElSpace>
+  <main class="login-container">
+    <div class="login-box">
+      <ElText type="primary" size="large" class="login-title">超星学习通作业查询系统</ElText>
+      <ElInput v-model="username" placeholder="账户" size="large" clearable class="login-input"/>
+      <ElInput v-model="password" type="password" placeholder="密码" size="large" show-password @keyup.enter="login" class="login-input"/>
+      <ElButton type="primary" @click="login" :loading="isLoading" class="login-button" size="large">登录</ElButton>
+    </div>
   </main>
 </template>
+
 <style scoped>
-main {
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%); /* Subtle gradient background */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.login-box {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 8px; /* Softer corners */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* More pronounced shadow */
+  width: 100%;
+  max-width: 420px; /* Slightly wider for better desktop feel */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%; /* Full viewport height for centering */
+  gap: 20px; /* Space between elements */
 }
 
-.username,
-.password,
-.loginButton {
-  align-items: center;
-  justify-content: center;
+.login-title {
+  text-align: center;
+  display: block;
+  font-size: 1.8em; /* Larger title */
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.login-input .el-input__inner {
+  height: 48px; /* Taller input fields */
+  font-size: 1.1em;
+}
+
+.login-button {
   width: 100%;
-  display: flex; /* Added display flex for proper alignment */
+  padding: 12px 0; /* More padding */
+  font-size: 1.1em;
+  margin-top: 10px;
 }
 
+/* Desktop specific adjustments if needed, though the above should scale well */
+@media (min-width: 768px) {
+  .login-box {
+    padding: 40px 50px; /* More padding on desktop */
+  }
+  .login-title {
+    font-size: 2em;
+  }
+}
 </style>
 
