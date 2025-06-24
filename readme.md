@@ -84,7 +84,7 @@ pip install "uvicorn[standard]"
 运行api.py
 
 ```
-uvicorn app:api --host 0.0.0.0 --port 8080 --reload
+uvicorn api:app --host 0.0.0.0 --port 8080 --reload
 ```
 
 #### 配置网页
