@@ -32,19 +32,15 @@ class PostgreSql:
                 self.reconnect()
         raise psycopg2.InterfaceError("Failed after multiple retries")
             
-    def insert(self, data, table, retries=3):
+    def insert(self, data, table):
         insert_query = f"INSERT INTO {table} (taskrefId, subject, homework_name, due_date, status, url) VALUES (%s, %s, %s, %s, %s, %s);"
-        for _ in range(retries):
-            try:
-                self.cur.execute(insert_query, (data['taskrefId'], data['subject'], data['homework_name'], data['due_date'], data['homework_status'], data['url']))
-                self.conn.commit()
-                return True
-            except psycopg2.IntegrityError:
-                print(f"Insert {data['homework_name']} failed due to integrity error")
-                self.reconnect()
-            except Exception as e:
-                print(f"Insert {data['homework_name']} failed: {e}")
-                self.conn.rollback()
+        try:
+            self.cur.execute(insert_query, (data['taskrefId'], data['subject'], data['homework_name'], data['due_date'], data['homework_status'], data['url']))
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"Insert {data['homework_name']} failed: {e}")
+            self.conn.rollback()
         return False
     
     def update(self, sql, data, retries=3):
