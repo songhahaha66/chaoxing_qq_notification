@@ -41,7 +41,7 @@ onMounted(async () => {
         <p class="question-description">{{ detail.description }}</p>
       </div>
       <br>
-      <ElButton @click="jumpXxt(homeworkData.detail_url)" type="primary" style="margin-top: 10px;">在学习通中查看</ElButton>
+      <ElButton @click="jumpXxt(homeworkData.detail_url)" type="primary" class="detail-button">在学习通中查看</ElButton>
     </div>
     <div v-else class="loading-wrapper">
       <p>正在加载作业详情...</p>
@@ -51,37 +51,35 @@ onMounted(async () => {
 
 <style scoped>
 .detail-info-container {
-  padding: 20px;
-  height: 100%; /* Assumes parent provides a constrained height. */
+  padding: 1.5rem;
+  height: 100%;
   overflow-y: auto;
-  /* If the component is meant to be the main scrollable area of a page: */
-  /* max-height: 100vh; /* Ensures it doesn't exceed viewport height, allowing scroll */
   box-sizing: border-box;
 }
 
 .content-wrapper h2 {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   font-size: 1.5em;
   color: #333;
 }
 
 .content-wrapper p {
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   line-height: 1.6;
 }
 
 .detail-item {
   background-color: #f9f9f9;
   border: 1px solid #eee;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.25rem;
 }
 
 .detail-item .question-title {
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 0.375rem;
 }
 
 .detail-item .question-description {
@@ -92,7 +90,25 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px; /* Or 100% if container has height */
+  height: 12.5rem;
+}
+
+.detail-button {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .detail-info-container {
+    padding: 1rem;
+  }
+  
+  .content-wrapper h2 {
+    font-size: 1.25em;
+  }
+  
+  .detail-item {
+    padding: 0.5rem;
+  }
 }
 </style>
 

@@ -28,8 +28,8 @@ i {
   display: flex;
   place-items: center;
   place-content: center;
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
 
   color: var(--color-text);
 }
@@ -48,14 +48,14 @@ h3 {
   }
 
   i {
-    top: calc(50% - 25px);
-    left: -26px;
+    top: calc(50% - 1.5rem);
+    left: -1.6rem;
     position: absolute;
     border: 1px solid var(--color-border);
     background: var(--color-background);
-    border-radius: 8px;
-    width: 50px;
-    height: 50px;
+    border-radius: 0.5rem;
+    width: 3rem;
+    height: 3rem;
   }
 
   .item:before {
@@ -63,8 +63,8 @@ h3 {
     border-left: 1px solid var(--color-border);
     position: absolute;
     left: 0;
-    bottom: calc(50% + 25px);
-    height: calc(50% - 25px);
+    bottom: calc(50% + 1.5rem);
+    height: calc(50% - 1.5rem);
   }
 
   .item:after {
@@ -72,8 +72,8 @@ h3 {
     border-left: 1px solid var(--color-border);
     position: absolute;
     left: 0;
-    top: calc(50% + 25px);
-    height: calc(50% - 25px);
+    top: calc(50% + 1.5rem);
+    height: calc(50% - 1.5rem);
   }
 
   .item:first-of-type:before {

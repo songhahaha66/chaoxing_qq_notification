@@ -73,50 +73,43 @@ const login = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%); /* Subtle gradient background */
-  padding: 20px;
-  box-sizing: border-box;
+  padding: 1rem;
 }
 
 .login-box {
   background-color: #ffffff;
-  padding: 30px 40px;
-  border-radius: 8px; /* Softer corners */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* More pronounced shadow */
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 420px; /* Slightly wider for better desktop feel */
+  max-width: 24rem;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Space between elements */
+  gap: 1.5rem;
 }
 
 .login-title {
   text-align: center;
   display: block;
-  font-size: 1.8em; /* Larger title */
+  font-size: 1.5rem;
   color: #333;
-  margin-bottom: 10px;
 }
 
-.login-input .el-input__inner {
-  height: 48px; /* Taller input fields */
-  font-size: 1.1em;
+.login-input {
+  font-size: 1rem;
 }
 
 .login-button {
   width: 100%;
-  padding: 12px 0; /* More padding */
-  font-size: 1.1em;
-  margin-top: 10px;
+  font-size: 1rem;
 }
 
-/* Desktop specific adjustments if needed, though the above should scale well */
 @media (min-width: 768px) {
   .login-box {
-    padding: 40px 50px; /* More padding on desktop */
+    padding: 2.5rem;
   }
   .login-title {
-    font-size: 2em;
+    font-size: 1.75rem;
   }
 }
 </style>

@@ -127,83 +127,93 @@ const prevPage = () => {
   align-items: center;
   justify-content: left;
   font-size: large;
-  height: 30px;
-  margin-right: auto; /* 使标题占据左侧空间 */
+  margin-right: auto;
 }
+
 .homework_data {
   height: 80vh;
   overflow-y: auto;
   overflow-x: hidden; 
 }
+
 .homework_data .el-row {
   flex-wrap: wrap;
 }
+
 .title_header {
   display: flex;
-  justify-content: flex-start; /* 改为左对齐，让标题和按钮靠近 */
-  gap: 20px; /* 控制标题和按钮之间的间距 */
-  margin-bottom: 10px;
+  justify-content: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
 }
+
 .refresh-btn {
-  margin-left: 10px; /* 确保按钮与标题有一定间距 */
+  margin-left: 0.75rem;
 }
 
 .card-row {
   display: flex;
-  flex-direction: row;     /* 水平排列 */
-  flex-wrap: wrap;         /* 允许换行 */
-  gap: 20px;               /* 卡片间距 */
-  padding: 10px 15px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
 }
 
 .homework-card-wrapper {
-  width: calc(50% - 20px); /* 每行两个卡片 */
-  min-width: 280px;
+  width: calc(50% - 1.5rem);
+  min-width: 18rem;
   margin-bottom: 0;
-  flex-grow: 0;            /* 防止卡片伸展 */
+  flex-grow: 0;
 }
 
 .clickable-card {
-  height: 100%;            /* 确保同一行卡片高度一致 */
-  /* 移除 max-width 和 margin，因为现在由 wrapper 控制宽度和位置 */
+  height: 100%;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;     /* 确保垂直居中对齐 */
-  gap: 10px;               /* 控制标题和按钮间距 */
-  min-height: 40px;        /* 保持一致的最小高度 */
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.5rem;
 }
 
 .homework-name {
   font-weight: bold;
-  margin-right: 0;         /* 移除右侧边距，使用上面的gap控制 */
+  margin-right: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  align-self: center;      /* 确保自身居中 */
-  display: flex;           /* 使元素能够垂直对齐 */
-  align-items: center;     /* 垂直居中 */
-  max-width: calc(100% - 110px); /* 给按钮留出空间 */
+  align-self: center;
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - 7rem);
 }
 
-/* 确保卡片内按钮对齐 */
 .card-header .el-button {
-  align-self: center;     /* 按钮自身垂直居中 */
-  flex-shrink: 0;         /* 防止按钮被压缩 */
+  align-self: center;
+  flex-shrink: 0;
 }
 
-/* 响应式调整 */
 @media (min-width: 1200px) {
   .homework-card-wrapper {
-    width: calc(33.333% - 20px); /* 大屏幕时每行三个卡片 */
+    width: calc(33.333% - 1.5rem);
   }
 }
 
 @media (max-width: 768px) {
   .homework-card-wrapper {
-    width: 100%; /* 小屏幕时每行一个卡片 */
+    width: 100%;
+  }
+  
+  .card-row {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .title_header {
+    gap: 1rem;
+    margin-bottom: 0.5rem;
   }
 }
 </style>

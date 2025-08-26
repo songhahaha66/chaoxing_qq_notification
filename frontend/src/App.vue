@@ -71,7 +71,7 @@ try{
 }
 .main_header {
   border: 1px solid var(--el-border-color);
-  height: 60px;
+  height: 4rem;
 }
 
 </style>
