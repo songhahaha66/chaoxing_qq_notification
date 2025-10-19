@@ -1,5 +1,6 @@
 import configparser
 import re
+import datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -23,25 +24,87 @@ class xxt:
             print("初始化登录成功")
 
     def get_all_homework(self):
-        res=self.req.get("http://mooc1-api.chaoxing.com/work/stu-work")
+        res = self.req.get("http://mooc1-api.chaoxing.com/work/stu-work")
         page = BeautifulSoup(res.text, 'html.parser')
         result = []
+
         for i in page.find_all("li"):
-            homework_name = i.find("p").text
-            homework_status = i.find_all("span")[0].text
-            subject = i.find_all("span")[1].text
+            # 跳过没有data属性的li标签
+            if not i.has_attr('data'):
+                continue
+
+            # 获取基本信息
             url = i['data']
+
+            # 获取作业名称
+            p_tag = i.find("p")
+            if not p_tag:
+                continue
+            homework_name = p_tag.get_text(strip=True)
+
+            # 获取所有span标签
+            spans = i.find_all("span")
+            if len(spans) < 2:
+                continue
+
+            # 获取作业状态（第一个span，如果有class="status"优先）
+            homework_status = None
+            for span in spans:
+                if span.has_attr('class') and 'status' in span.get('class', []):
+                    homework_status = span.get_text(strip=True)
+                    break
+            if not homework_status:
+                homework_status = spans[0].get_text(strip=True)
+
+            # 获取科目名称（第二个span）
+            subject = spans[1].get_text(strip=True)
+
+            # 获取剩余时间信息（如果有class="fr"的span）
+            remaining_time = None
+            for span in spans:
+                if span.has_attr('class') and 'fr' in span.get('class', []):
+                    remaining_time = span.get_text(strip=True)
+                    break
+
+            # 提取taskrefId
+            taskrefId = None
             try:
-                taskrefId = url.split('taskrefId=')[1].split('&')[0]
+                if 'taskrefId=' in url:
+                    taskrefId = url.split('taskrefId=')[1].split('&')[0]
             except:
-                taskrefId = None
-            if homework_status != "未提交":
-                result.append({"subject":subject,"homework_name":homework_name, "homework_status":homework_status, "url":url, "taskrefId":taskrefId})
-            else:
-                r = self.req.get(url)
-                p = BeautifulSoup(r.text, 'html.parser')
-                deadline = p.find_all("h4")[1].text[5:]
-                result.append({"subject":subject,"homework_name":homework_name, "homework_status":homework_status, "url":url, "deadline":deadline, "taskrefId":taskrefId})
+                pass
+
+            # 构建作业信息
+            homework_info = {
+                "subject": subject,
+                "homework_name": homework_name,
+                "homework_status": homework_status,
+                "url": url,
+                "taskrefId": taskrefId
+            }
+
+            # 如果有剩余时间信息，添加到结果中
+            if remaining_time:
+                homework_info["remaining_time"] = remaining_time
+
+            # 如果是未提交的作业，根据剩余时间计算截止时间
+            if homework_status == "未提交":
+                deadline = None
+
+                # 如果没有获取到截止时间，根据剩余时间计算
+                if not deadline and remaining_time:
+                    # 解析剩余时间格式，如 "剩余166小时3分钟"
+                    time_match = re.search(r'剩余(\d+)小时(\d+)分钟', remaining_time)
+                    if time_match:
+                        hours = int(time_match.group(1))
+                        minutes = int(time_match.group(2))
+                        # 计算截止时间
+                        deadline_time = datetime.datetime.now() + datetime.timedelta(hours=hours, minutes=minutes)
+                        deadline = deadline_time.strftime("%Y-%m-%d %H:%M")
+                        homework_info["deadline"] = deadline
+
+            result.append(homework_info)
+
         return result
 
     def get_all_exam(self):

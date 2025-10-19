@@ -55,7 +55,6 @@ jobs:
           docker run -d \
             --name qq-notification \
             --restart unless-stopped \
-            --network 1panel-network \
             -p 8001:8000 \
             -v $(pwd)/config.ini:/app/config.ini \
             -v $(pwd)/logs:/app/logs \
