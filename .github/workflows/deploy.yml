@@ -47,6 +47,10 @@ jobs:
           # Pull latest image
           docker pull ${{ secrets.ALIYUN_REGISTRY }}:latest
 
+          # Stop and remove existing container
+          docker stop qq-notification || true
+          docker rm qq-notification || true
+
           # Start new container
           docker run -d \
             --name qq-notification \
