@@ -51,7 +51,7 @@ jobs:
           docker run -d \
             --name qq-notification \
             --restart unless-stopped \
-            -p 8000:8000 \
+            -p 8001:8000 \
             -v $(pwd)/config.ini:/app/config.ini \
             -v $(pwd)/logs:/app/logs \
             ${{ secrets.ALIYUN_REGISTRY }}:latest
