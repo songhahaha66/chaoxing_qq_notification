@@ -155,8 +155,7 @@ def get_and_update_homework_list(xxt, db):
         elif index is None:
             print(homework)
             try:
-                homework_copy['due_date'] = datetime.strptime(
-                    f"{datetime.now().year}-{homework['deadline']}", '%Y-%m-%d %H:%M')
+                homework_copy['due_date'] = datetime.strptime(homework['deadline'], '%Y-%m-%d %H:%M')
             except:
                 homework_copy['due_date'] = None
             result = db.insert(homework_copy, "homework")
