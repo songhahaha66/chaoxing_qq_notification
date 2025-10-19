@@ -74,7 +74,7 @@ def get_and_update_data(xxt, db):
             cancel_task(homework['taskrefId'])
         elif index is None:
             try:
-                homework_copy['due_date'] = datetime.datetime.strptime(f"{datetime.datetime.now().year}-{homework['deadline']}", '%Y-%m-%d %H:%M')
+                homework_copy['due_date'] = datetime.datetime.strptime(homework['deadline'], '%Y-%m-%d %H:%M')
             except:
                 homework_copy['due_date'] = None
             result = db.insert(homework_copy, "homework")

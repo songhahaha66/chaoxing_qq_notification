@@ -17,7 +17,6 @@ COPY requirements.txt .
 # 使用uv安装依赖 (更快)
 RUN uv venv
 RUN uv pip install -r requirements.txt
-RUN uv pip install "uvicorn[standard]"
 # 复制应用代码
 COPY . .
 
