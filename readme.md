@@ -6,8 +6,19 @@
 ## 配置
 
 ### 安装数据库
+请安装PostgreSQL，创建数据表homework
 
-readmschedule_task BOOL,
+```postgresql
+CREATE TABLE homework  (
+  taskrefId SERIAL PRIMARY KEY,
+  subject VARCHAR(255) NOT NULL,
+  homework_name TEXT NOT NULL,
+  due_date TIMESTAMP,
+  status TEXT NOT NULL,
+  url TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  schedule_task BOOL,
   detail_url TEXT,
   detail_info TEXT
 );
